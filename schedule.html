@@ -35,6 +35,9 @@ button,.button{border:0;border-radius:11px;padding:13px 15px;font-weight:800;fon
 footer{text-align:center;font-size:.75rem;color:#777;padding:8px 12px 24px}
 @media(max-width:540px){.fields{grid-template-columns:1fr}.card{padding:13px}main{padding:12px 9px 28px}.actions button{flex:1}}
 @media print{
+ .no-print{display:none!important}
+ #rawPrintSection{display:block!important}
+ #rawSchedule{display:none!important}
  @page{size:A4 portrait;margin:12mm}
  body{background:white;font-size:10pt}
  header{padding:0 0 10px;background:white;color:#111;border-bottom:3px solid #A50034;box-shadow:none}
@@ -69,6 +72,20 @@ footer{text-align:center;font-size:.75rem;color:#777;padding:8px 12px 24px}
 <label>Unit number (optional)<input id="unit" inputmode="numeric" placeholder="Unit number"></label>
 <label>Prepared by (optional)<input id="preparedBy" placeholder="Name or initials"></label>
 </div>
+</section>
+<section class="card">
+<h2>Import timetable text</h2>
+<p class="help">Paste any timetable text you have copied. The full text will be included in the printable PDF, and the app will try to identify simple station/time rows for editing.</p>
+<label for="rawSchedule">Copied schedule text<textarea id="rawSchedule" placeholder="Paste timetable text here…"></textarea></label>
+<div class="actions no-print">
+<button class="dark" id="importText" type="button">Import pasted text</button>
+<button class="light" id="clearRaw" type="button">Clear pasted text</button>
+</div>
+<p class="help" style="margin:10px 0 0">This accepts pasted text; it does not read the authenticated Genius Mobile page directly.</p>
+</section>
+<section class="card print-only" id="rawPrintSection" style="display:none">
+<h2>Imported timetable text</h2>
+<pre id="rawPrint" style="white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;margin:0"></pre>
 </section>
 <section class="card">
 <h2>Timetable stops</h2>
@@ -112,6 +129,35 @@ function addRow(values={}) {
  b.addEventListener('click',()=>tr.remove());td.appendChild(b);tr.appendChild(td);tbody.appendChild(tr);
 }
 function setToday(){const d=new Date();const local=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);document.getElementById('travelDate').value=local}
+
+document.getElementById('importText').addEventListener('click',()=>{
+ const raw=document.getElementById('rawSchedule').value.trim();
+ if(!raw){alert('Paste timetable text first.');return;}
+ document.getElementById('rawPrint').textContent=raw;
+ document.getElementById('rawPrintSection').style.display='block';
+ const timeRe=/\b(?:[01]?\d|2[0-3]):[0-5]\d\b/g;
+ const parsed=[];
+ raw.split(/\r?\n/).map(s=>s.trim()).filter(Boolean).forEach(line=>{
+   const times=line.match(timeRe)||[];
+   if(!times.length)return;
+   const station=line.replace(timeRe,' ').replace(/\s{2,}/g,' ').replace(/^[|,;:\-\s]+|[|,;:\-\s]+$/g,'').trim();
+   if(!station)return;
+   parsed.push({station,arrival:times.length>1?times[0]:'',departure:times.length>1?times[1]:times[0],platform:'',notes:times.length>2?('Additional times: '+times.slice(2).join(', ')):''});
+ });
+ if(parsed.length){
+   tbody.innerHTML='';
+   parsed.forEach(addRow);
+   alert('Imported text for printing and identified '+parsed.length+' possible row(s). Please check the parsed rows before exporting.');
+ } else {
+   alert('The text is ready for PDF printing. No simple station/time rows were recognised, so the original text will be printed as supplied.');
+ }
+});
+document.getElementById('clearRaw').addEventListener('click',()=>{
+ document.getElementById('rawSchedule').value='';
+ document.getElementById('rawPrint').textContent='';
+ document.getElementById('rawPrintSection').style.display='none';
+});
+
 document.getElementById('addRow').addEventListener('click',()=>addRow());
 document.getElementById('sample').addEventListener('click',()=>{
  tbody.innerHTML='';

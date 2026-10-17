@@ -44,3 +44,7 @@ Service workers require HTTPS or `localhost`. Opening `index.html` directly from
 Open **Schedule · Build / Export PDF** from the launcher. Enter the route, date, headcode and station timings, add/remove rows, then choose **Export / Print PDF**. On iPhone, use the print preview's Share action and choose Save to Files. On desktop, choose Save as PDF in the print dialog.
 
 The schedule page is a manual document builder. It does not read or scrape the authenticated Genius Mobile schedule page and does not verify live timings. Verify all information against the official system before operational use.
+
+
+## Import copied timetable text
+Paste timetable text into the Schedule page's **Import timetable text** box and choose **Import pasted text**. The full text is retained in the printable PDF; simple lines with station names and HH:MM times are also parsed into editable rows where possible. Check all rows before operational use. This is a paste/import feature, not direct scraping of the authenticated Genius Mobile page.
