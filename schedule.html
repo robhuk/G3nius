@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#A50034">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<title>Train Schedule PDF | Genius Mobile</title>
+<style>
+:root{--red:#A50034;--gold:#F2B632;--ink:#222;--muted:#666;--bg:#f2f3f5}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:var(--ink)}
+header{background:var(--red);color:#fff;padding:calc(15px + env(safe-area-inset-top)) 16px 18px}
+.head{max-width:900px;margin:auto;display:flex;align-items:center;gap:12px}
+.logo{width:48px;height:48px;border:2px solid var(--gold);border-radius:12px;overflow:hidden;background:white;flex:none}.logo img{width:100%;height:100%}
+h1{font-size:1.12rem;margin:0}.sub{margin:4px 0 0;font-size:.82rem;opacity:.9}
+main{max-width:900px;margin:auto;padding:16px 12px 36px}
+.card{background:white;border:1px solid #e2e3e5;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 4px 16px #00000008}
+h2{font-size:1.12rem;margin:0 0 12px}.help{font-size:.88rem;color:var(--muted);line-height:1.45;margin:0 0 14px}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+label{font-size:.78rem;font-weight:700;display:block;color:#444}
+input,textarea{font:inherit;width:100%;margin-top:5px;padding:11px;border:1px solid #cfd2d6;border-radius:9px;background:white;color:var(--ink);min-width:0}
+textarea{min-height:80px;resize:vertical}
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:.88rem}
+th{background:var(--red);color:white;text-align:left;padding:10px 8px}
+td{border-bottom:1px solid #ddd;padding:5px}
+td input{margin:0;padding:9px 7px;border-color:#e0e1e3}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+button,.button{border:0;border-radius:11px;padding:13px 15px;font-weight:800;font-size:.92rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.primary{background:var(--gold);color:#241b00;box-shadow:0 2px 0 #bd8718}.dark{background:var(--red);color:white}.light{background:#eceef0;color:#252525}
+.back{color:white;text-decoration:none;font-weight:700;margin-left:auto}
+.note{background:#fff7df;border:1px solid #f0d78d;padding:12px;border-radius:10px;font-size:.84rem;color:#594812;line-height:1.4}
+.remove{padding:7px 9px;background:#f4e7eb;color:var(--red);font-size:.8rem}
+footer{text-align:center;font-size:.75rem;color:#777;padding:8px 12px 24px}
+@media(max-width:540px){.fields{grid-template-columns:1fr}.card{padding:13px}main{padding:12px 9px 28px}.actions button{flex:1}}
+@media print{
+ @page{size:A4 portrait;margin:12mm}
+ body{background:white;font-size:10pt}
+ header{padding:0 0 10px;background:white;color:#111;border-bottom:3px solid #A50034;box-shadow:none}
+ .logo,.back,.no-print,.note{display:none!important}
+ .head{max-width:none}.sub{color:#555}
+ main{max-width:none;padding:10px 0}
+ .card{box-shadow:none;border:0;border-radius:0;padding:8px 0;margin:0 0 8px;break-inside:avoid}
+ .print-only{display:block!important}
+ h2{font-size:13pt}
+ input,textarea{border:0;padding:2px 0;margin:0;background:transparent;color:#111;appearance:none}
+ textarea{min-height:45px}
+ table{min-width:0;font-size:9pt;table-layout:fixed}
+ th{background:#A50034!important;color:white!important;print-color-adjust:exact;-webkit-print-color-adjust:exact;padding:7px 5px}
+ td{padding:3px;border-bottom:1px solid #bbb}
+ td input{font-size:9pt}
+ .remove-col{display:none}
+ footer{padding-top:12px}
+}
+</style>
+</head>
+<body>
+<header><div class="head"><div class="logo"><img src="./icon-192.png" alt=""></div><div><h1>Genius Mobile · Train Schedule</h1><p class="sub">Create and export a printable timetable</p></div><a class="back" href="./index.html">← Home</a></div></header>
+<main>
+<section class="card">
+<h2>Schedule details</h2>
+<p class="help">Enter or copy the timetable details you are authorised to use. This tool creates a printable PDF layout; it does not connect to Genius Mobile or retrieve live timetable data.</p>
+<div class="fields">
+<label>Origin<input id="origin" placeholder="e.g. Newcastle"></label>
+<label>Destination<input id="destination" placeholder="e.g. Birmingham New Street"></label>
+<label>Travel date<input id="travelDate" type="date"></label>
+<label>Headcode / service<input id="headcode" placeholder="e.g. 1V48"></label>
+<label>Unit number (optional)<input id="unit" inputmode="numeric" placeholder="Unit number"></label>
+<label>Prepared by (optional)<input id="preparedBy" placeholder="Name or initials"></label>
+</div>
+</section>
+<section class="card">
+<h2>Timetable stops</h2>
+<p class="help">Add one row per station or timing point. Use arrival/departure fields as appropriate.</p>
+<div class="table-wrap">
+<table id="stops">
+<thead><tr><th style="width:28%">Station / location</th><th style="width:15%">Arrival</th><th style="width:15%">Departure</th><th style="width:16%">Platform</th><th style="width:20%">Notes</th><th class="remove-col" style="width:6%">×</th></tr></thead>
+<tbody id="stopRows"></tbody>
+</table>
+</div>
+<div class="actions no-print">
+<button class="dark" id="addRow" type="button">＋ Add station</button>
+<button class="light" id="sample" type="button">Load example rows</button>
+</div>
+</section>
+<section class="card">
+<h2>Notes</h2>
+<textarea id="notes" placeholder="Optional operational notes or timetable caveats"></textarea>
+<div class="actions no-print">
+<button class="primary" id="export" type="button">▤ Export / Print PDF</button>
+<button class="light" id="clear" type="button">Clear timetable</button>
+</div>
+<p class="help no-print" style="margin-top:12px;margin-bottom:0">On iPhone: tap Export / Print PDF, use the iOS Share button on the print preview, then choose Save to Files. On desktop, select “Save as PDF” in the print destination.</p>
+</section>
+<div class="note no-print"><strong>Data note:</strong> this is a manual timetable document builder. It does not sign in to Genius Mobile, scrape its schedule page, or verify timings. Check all entries against the official operational source before use.</div>
+</main>
+<footer>Genius Mobile Schedule PDF · Independent utility · Not an official CrossCountry or Genius product</footer>
+<script>
+const tbody=document.getElementById('stopRows');
+function addRow(values={}) {
+ const tr=document.createElement('tr');
+ const cols=[['station','Station / location'],['arrival','Arrival'],['departure','Departure'],['platform','Platform'],['notes','Notes']];
+ cols.forEach(([key,label])=>{
+  const td=document.createElement('td');const input=document.createElement('input');
+  input.setAttribute('aria-label',label);input.dataset.field=key;input.value=values[key]||'';
+  if(key==='arrival'||key==='departure'){input.placeholder='HH:MM';input.inputMode='numeric';}
+  td.appendChild(input);tr.appendChild(td);
+ });
+ const td=document.createElement('td');td.className='remove-col';
+ const b=document.createElement('button');b.type='button';b.className='remove';b.textContent='×';b.setAttribute('aria-label','Remove station');
+ b.addEventListener('click',()=>tr.remove());td.appendChild(b);tr.appendChild(td);tbody.appendChild(tr);
+}
+function setToday(){const d=new Date();const local=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);document.getElementById('travelDate').value=local}
+document.getElementById('addRow').addEventListener('click',()=>addRow());
+document.getElementById('sample').addEventListener('click',()=>{
+ tbody.innerHTML='';
+ [
+ {station:'Newcastle',departure:'06:40',platform:'',notes:''},
+ {station:'Durham',arrival:'06:53',departure:'06:55'},
+ {station:'Darlington',arrival:'07:09',departure:'07:11'},
+ {station:'York',arrival:'07:42',departure:'07:45'},
+ {station:'Birmingham New Street',arrival:'10:56'}
+ ].forEach(addRow);
+ if(!document.getElementById('origin').value)document.getElementById('origin').value='Newcastle';
+ if(!document.getElementById('destination').value)document.getElementById('destination').value='Birmingham New Street';
+ if(!document.getElementById('headcode').value)document.getElementById('headcode').value='1V48';
+});
+document.getElementById('export').addEventListener('click',()=>{
+ if(!tbody.children.length){alert('Add at least one station before exporting.');return;}
+ document.title='Genius-Schedule-'+(document.getElementById('origin').value||'Origin').replace(/[^a-z0-9]+/gi,'-')+'-to-'+(document.getElementById('destination').value||'Destination').replace(/[^a-z0-9]+/gi,'-');
+ window.print();
+});
+document.getElementById('clear').addEventListener('click',()=>{
+ if(confirm('Clear all timetable stops and schedule notes?')){tbody.innerHTML='';['origin','destination','headcode','unit','preparedBy','notes'].forEach(id=>document.getElementById(id).value='');addRow();}
+});
+setToday();addRow();addRow();addRow();
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body></html>
